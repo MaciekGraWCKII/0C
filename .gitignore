@@ -19,3 +19,9 @@
 *.exe
 *.out
 *.app
+
+#Wszystko oprócz śmiesznych kotów
+*.*
+!/0C
+!/0C/*.cpp
+!/0C/*.h
