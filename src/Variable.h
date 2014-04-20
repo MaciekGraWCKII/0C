@@ -6,10 +6,11 @@
 class Variable
 {
 public:
-	Variable(std::string type);
+	Variable(const std::string& type);
 
 	std::string get_type() const;
-	virtual bool operator==(const Variable &var)const;
+	virtual bool operator==(const Variable& var)const;
+	virtual Variable& operator=(const Variable& var);
 
 private:
 	std::string type;
