@@ -7,11 +7,20 @@
 class Script_Environment
 {
 public:
-	Function_Space& get_function_space() const;
-	Variable_Space& get_variable_space() const;
+	Script_Environment();
+
+	Function_Space& get_function_space();
+	Variable_Space& get_variable_space();
 
 	bool is_name_used_in_variable_space(const std::string& name) const;
 	bool is_name_used_in_function_space(const std::string& name) const;
+
+
+private:
+	Function_Space function_space;
+	Variable_Space variable_space;
+
+
 };
 
 #endif

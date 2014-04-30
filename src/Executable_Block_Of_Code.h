@@ -6,7 +6,7 @@
 class Executable_Block_Of_Code
 {
 public:
-	Variable* execute(Script_Environment& environment);
+	virtual Variable* execute(Script_Environment& environment);
 	
 };
 
