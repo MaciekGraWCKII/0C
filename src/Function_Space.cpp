@@ -17,7 +17,7 @@ Variable* Function_Space::call_function(const std::string& name,
 	{
 		if((*it)->are_arguments_valid(args))
 		{
-			return (*it)->execute(args);
+			return (*it)->execute(args, this->environment);
 		}
 
 		++it;
@@ -177,5 +177,15 @@ Function_Space::~Function_Space()
 
 bool Function_Space::is_name_available(const std::string& name) const
 {
-	return environment.is_name_used_in_variable_space(name);
+	if(this->environment.is_name_used_in_variable_space(name))
+	{
+		return false;
+	}
+	
+	if(this->environment.is_name_used_in_variable_factory(name))
+	{
+		return false;
+	}
+
+	return true;
 }

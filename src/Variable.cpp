@@ -17,5 +17,26 @@ bool Variable::operator==(const Variable& var) const
 
 Variable& Variable::operator=(const Variable& var)
 {
-	this->type = var.type;
+	this->type = var.get_type();
+	return *this;
+}
+
+Variable::~Variable()
+{
+
+}
+
+Integer::Integer(int nteger) : Variable(TYPE_INTEGER), value(nteger)
+{
+
+}
+
+String::String(const std::string& str) : Variable(TYPE_STRING), str(str)
+{
+
+}
+
+std::string& String::get_string()
+{
+	return this->str;
 }

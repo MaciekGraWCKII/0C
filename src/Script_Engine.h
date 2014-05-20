@@ -14,8 +14,13 @@ public:
 	Script_Engine();
 	Script_Engine(Communicator* communicator);
 
-	void parse(std::string& line_of_code) const;
+	void parse(std::string& line_of_code);
 
+	void parse_preprocessed(std::string& line_of_code);
+		//assumes code is prepared for execution after one operation: split
+		//Data example: "int a = 5 * 8 ;"
+		//will be split into "int", "a", "=", "5", "*", "8", ";" and executed 
+	
 	bool add_function(const std::string& name, Function* fun);
 
 	~Script_Engine();

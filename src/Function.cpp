@@ -1,7 +1,10 @@
 #include "Function.h"
 
+#include "Variable_Space.h"
+#include "Script_Environment.h"
+
 Function::Function_Arguments::Function_Arguments(
-	const unsigned int size, Variable* variable_array) : size(size),
+	const unsigned int size, Variable** variable_array) : size(size),
 	variable_array(variable_array)
 {
 
@@ -11,23 +14,29 @@ Variable& Function::Function_Arguments::operator[](const unsigned int index)
 {
 	this->throw_if_out_of_bounds(index);
 
-	return this->variable_array[index];
+	return *(this->variable_array[index]);
 }
 
 const Variable& Function::Function_Arguments::operator[](const unsigned int index) const
 {
 	this->throw_if_out_of_bounds(index);
 
-	return this->variable_array[index];
+	return *(this->variable_array[index]);
 }
 
 unsigned int Function::Function_Arguments::get_size() const
 {
-	return size;
+	return this->size;
 }
 
 Function::Function_Arguments::~Function_Arguments()
 {
+	for(unsigned int i = 0; i < this->size; ++i)
+	{
+		//TODO odkomentowac!!!
+		//delete this->variable_array[i];
+	}
+
 	delete[] variable_array;
 }
 

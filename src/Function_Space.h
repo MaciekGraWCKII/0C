@@ -31,7 +31,7 @@ private:
 	std::map<std::string, std::list<Function*>> fun_map;
 	Script_Environment& environment;
 
-	bool is_name_available(const std::string& name) const;
+	bool is_name_available(const std::string& name) const; //will not check whether the name is used in Function_Space
 };
 
 #endif

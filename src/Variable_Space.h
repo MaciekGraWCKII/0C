@@ -7,6 +7,8 @@
 
 #include "Variable.h"
 
+class Script_Environment;
+
 class Variable_Space
 {
 public:

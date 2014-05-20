@@ -4,7 +4,8 @@
 
 #include "Executable_Block_Of_Code.h"
 #include "Variable.h"
-#include "Script_Environment.h"
+
+class Script_Environment;
 
 class Function
 {
@@ -12,7 +13,7 @@ public:
 	class Function_Arguments
 	{
 	public:
-		Function_Arguments(const unsigned int size, Variable* variable_array);
+		Function_Arguments(const unsigned int size, Variable** variable_array);
 
 		Variable& operator[](const unsigned int index);
 		const Variable& operator[](const unsigned int index) const;
@@ -20,7 +21,7 @@ public:
 
 		~Function_Arguments();
 	private:
-		Variable* variable_array;
+		Variable** variable_array;
 		unsigned int size;
 		
 		void throw_if_out_of_bounds(const unsigned int index) const;
@@ -48,7 +49,9 @@ public:
 		void throw_if_out_of_bounds(const unsigned int index) const;
 	};
 
-	Function(const std::string& return_value, Function_Arguments_Dummy* args_dummy, Executable_Block_Of_Code* exec);
+	Function(const std::string& return_value, 
+		Function_Arguments_Dummy* args_dummy, Executable_Block_Of_Code* exec);
+	
 	bool are_arguments_valid(const Function_Arguments& args_to_check) const;
 	bool are_arguments_valid(const Function_Arguments_Dummy& args_dummy_to_check) const;
 	const std::string& get_return_type() const;

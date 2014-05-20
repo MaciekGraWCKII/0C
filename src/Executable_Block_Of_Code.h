@@ -1,12 +1,13 @@
 #ifndef EXECUTABLE_BLOCK_OF_CODE_H
 #define EXECUTABLE_BLOCK_OF_CODE_H
 
-#include "Script_Environment.h"
+class Script_Environment;
+class Variable;
 
 class Executable_Block_Of_Code
 {
 public:
-	virtual Variable* execute(Script_Environment& environment);
+	virtual Variable* execute(Script_Environment& environment) = 0;
 	
 };
 

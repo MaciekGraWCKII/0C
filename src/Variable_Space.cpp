@@ -1,4 +1,5 @@
 #include "Variable_Space.h"
+
 #include "Script_Environment.h"
 
 Variable_Space::Variable_Space(Script_Environment& env) : environment(env)
@@ -142,12 +143,20 @@ Variable& Variable_Space::Subspace::get_variable(const std::string& name) throw 
 
 bool Variable_Space::is_available(const std::string& name) const
 {
-	if(environment.is_name_used_in_function_space(name))
+	if(this->environment.is_name_used_in_function_space(name))
 	{
 		return false;
 	}
-	else
+	
+	if(this->is_name_used_in_current_subspace(name))
 	{
-		return !this->is_name_used_in_current_subspace(name);
+		return false;
 	}
+	
+	if(this->environment.is_name_used_in_variable_factory(name))
+	{
+		return false;
+	}
+
+	return true;
 }

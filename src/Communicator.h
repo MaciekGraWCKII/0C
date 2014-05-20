@@ -6,7 +6,7 @@
 class Communicator
 {
 public:
-	virtual void write(const std::string& line) const;
+	virtual void write(const std::string& line) const = 0;
 
 };
 
