@@ -31,6 +31,46 @@ Integer::Integer(int nteger) : Variable(TYPE_INTEGER), value(nteger)
 
 }
 
+bool Integer::operator==(const Variable& var) const
+{
+	if(var.get_type() == this->get_type())
+	{
+		return this->operator==((Integer&)var);
+	}
+	else
+	{
+		//TODO
+		//czy moze jednak wyjatek?
+		return false;
+	}
+}
+
+bool Integer::operator==(const Integer& integer) const
+{
+	return this->value == integer.value;
+}
+
+Variable& Integer::operator=(const Variable& var)
+{
+	if(var.get_type() == this->get_type())
+	{
+		return this->operator=((Integer&)var);
+	}
+	else
+	{
+		//TODO
+		//czy moze jednak wyjatek?
+		return *this;
+	}
+}
+
+Integer& Integer::operator=(const Integer& integer)
+{
+	this->value = integer.value;
+	this->Variable::operator=(integer);
+	return *this;
+}
+
 int Integer::get_int()
 {
 	return value;
@@ -39,6 +79,45 @@ int Integer::get_int()
 String::String(const std::string& str) : Variable(TYPE_STRING), str(str)
 {
 
+}
+
+bool String::operator==(const Variable& var) const
+{
+	if(var.get_type() == this->get_type())
+	{
+		return this->operator==((String&)var);
+	}
+	else
+	{
+		//TODO
+		//czy moze jednak wyjatek?
+		return false;
+	}
+}
+
+bool String::operator==(const String& str) const
+{
+	return this->str == str.str;
+}
+
+Variable& String::operator=(const Variable& var)
+{
+	if(var.get_type() == this->get_type())
+	{
+		return this->operator=((String&) var);
+	}
+	else
+	{
+		//TODO
+		//czy moze jednak wyjatek?
+		return *this;
+	}
+}
+
+String& String::operator=(const String& str)
+{
+	this->str = str.str;
+	return *this;
 }
 
 std::string& String::get_string()

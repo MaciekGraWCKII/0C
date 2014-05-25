@@ -28,6 +28,10 @@ class Integer : public Variable
 {
 public:
 	Integer(const int nteger = 0);
+	bool operator==(const Variable& var) const;
+	bool operator==(const Integer& integer) const;
+	Variable& operator=(const Variable& var);
+	Integer& operator=(const Integer& integer);
 
 	int get_int();
 private:
@@ -38,6 +42,10 @@ class String : public Variable
 {
 public:
 	String(const std::string& str = "");
+	bool operator==(const Variable& var) const;
+	bool operator==(const String& str) const;
+	Variable& operator=(const Variable& var);
+	String& operator=(const String& str);
 
 	std::string& get_string();
 private:
