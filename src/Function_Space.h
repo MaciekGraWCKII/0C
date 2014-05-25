@@ -16,7 +16,7 @@ public:
 	Function_Space(Script_Environment& env);
 
 	Variable* call_function(const std::string& name,
-		const Function::Function_Arguments& args) const; //will not check if the function exists
+		const Function::Function_Arguments& args) const; //will not check if the function exists or if the arguments fit any function
 	bool is_function_here(const std::string& name,
 		const Function::Function_Arguments& args) const;
 	bool is_function_here(const std::string& name,

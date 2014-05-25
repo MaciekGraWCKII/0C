@@ -29,6 +29,7 @@ class Integer : public Variable
 public:
 	Integer(const int nteger = 0);
 
+	int get_int();
 private:
 	int value;
 };

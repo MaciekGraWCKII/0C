@@ -8,6 +8,7 @@ class Communicator
 public:
 	virtual void write(const std::string& line) const = 0;
 
+	virtual ~Communicator(){}
 };
 
 #endif

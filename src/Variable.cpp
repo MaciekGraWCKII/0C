@@ -31,6 +31,11 @@ Integer::Integer(int nteger) : Variable(TYPE_INTEGER), value(nteger)
 
 }
 
+int Integer::get_int()
+{
+	return value;
+}
+
 String::String(const std::string& str) : Variable(TYPE_STRING), str(str)
 {
 

@@ -53,9 +53,32 @@ public:
 	}
 };
 
+bool can_i_has_log = true;
+class Announcer : public Communicator
+{
+public:
+	void write(const std::string& line)const
+	{
+		if(can_i_has_log)
+		{
+			std::cout << line;
+		}
+	}
+};
+
+class Change_logging : public Executable_Block_Of_Code
+{
+public:
+	Variable* execute(Script_Environment& environment)
+	{
+		can_i_has_log = ((Integer&)environment.get_variable_space().get_variable("CHANGE_LOGGING_VARIABLE_0")).get_int() != 0;
+		return NULL;
+	}
+};
+
 int main()
 {
-	Script_Engine engine;
+	Script_Engine engine(new Announcer());
 	cout << engine.add_function("halt", new Function(TYPE_NULL, 
 		new Function::Function_Arguments_Dummy(0, NULL, NULL),
 		new Exec())) << endl;
@@ -72,6 +95,14 @@ int main()
 		new Function::Function_Arguments_Dummy(1, tab, tab1),
 		new Exec_echo())) << endl;
 
+	std::string* tab_log = new std::string[1];
+	tab_log[0] = "CHANGE_LOGGING_VARIABLE_0";
+	std::string* tab_log_types = new std::string[1];
+	tab_log_types[0] = TYPE_INTEGER;
+	cout << engine.add_function("change_logging", new Function(TYPE_NULL,
+		new Function::Function_Arguments_Dummy(1, tab_log, tab_log_types),
+		new Change_logging())) << endl;
+
 	string entry;
 
 	while(nexit)
@@ -81,7 +112,7 @@ int main()
 		{
 			break;
 		}
-		engine.parse_preprocessed(entry);
+		engine.parse_test_regex(entry);
 	}
 
 	cout << endl << "system(\"PAUSE\");" << endl;

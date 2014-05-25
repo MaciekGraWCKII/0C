@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <cctype>
+#include <regex>
 
 Script_Engine::Script_Engine()
 {
@@ -20,6 +21,146 @@ Script_Engine::Script_Engine(Communicator* communicator) : comms(communicator)
 void Script_Engine::parse(std::string& line_of_code)
 {
 	
+}
+
+void Script_Engine::parse_test_regex(std::string& line_of_code)
+{
+	std::regex reg("([a-zA-Z]\\w*)\\((.*)\\);");
+	std::smatch match;
+
+	if(std::regex_match(line_of_code, match, reg))
+	{
+		this->comms->write("Matched: \"" + line_of_code + "\"\n");
+		for(unsigned int i = 0; i < match.size(); ++i)
+		{
+			this->comms->write(std::to_string(i) + ": \"" + match[i].str() + "\"\n");
+		}
+
+		if(!this->environment.get_function_space().is_name_here(match[1]))
+		{
+			this->comms->write("There is no function that goes by the name of \"" + match[1].str() + "\n");
+			return;
+		}
+
+		if(match[2] == "")
+		{
+			//no args
+			Function::Function_Arguments func_args(0, NULL);
+			if(this->environment.get_function_space().is_function_here(
+				match[1], func_args))
+			{
+				this->comms->write("Calling.\n");
+				this->environment.get_function_space().call_function(match[1], func_args);
+				this->comms->write("#done.\n");
+			}
+			else
+			{
+				this->comms->write("No matching function found for these arguments.\n");
+			}
+
+			return;
+		}
+
+		std::string args = match[2];
+		std::list<std::string> arg_list;
+		unsigned int first_letter_to_cut = 0;
+
+		for(unsigned int i = 0; i < args.size(); ++i)
+		{
+			if(args[i] == ',')
+			{
+				arg_list.push_back(args.substr(first_letter_to_cut, i - 1));
+				first_letter_to_cut = i + 1;
+			}
+		}
+		arg_list.push_back(args.substr(first_letter_to_cut));
+		
+		unsigned int number_of_variables = 0;
+		std::list<Variable*> var_list;
+		for(std::list<std::string>::iterator it = arg_list.begin(); it != arg_list.end(); ++it)
+		{
+			this->comms->write("arg " + std::to_string(number_of_variables) + ": \"" + *it + "\"");
+			++number_of_variables;
+			
+			//Remove irrelevant spaces
+			bool before = true;
+			bool met_quotation_mark = false;
+			unsigned int index_of_a_first_character = 0;
+			unsigned int number_of_chars = 0;
+			for(unsigned int i = 0; i < (*it).size(); ++i)
+			{
+				if(before)
+				{
+					if((*it)[i] == ' ')
+					{
+						++index_of_a_first_character;
+					}
+					else
+					{
+						before = false;
+						if((*it)[i] == '\"')
+						{
+							met_quotation_mark = true;
+						}
+						++number_of_chars;
+					}
+				}
+				else
+				{
+					if((*it)[i] == '\"')
+					{
+						break;
+					}
+					if((*it)[i] == ' ')
+					{
+						if(!met_quotation_mark)
+						{
+							break;
+						}
+						++number_of_chars;
+					}
+					else
+					{
+						++number_of_chars;
+					}
+				}
+			}
+			*it = (*it).substr(index_of_a_first_character, number_of_chars);
+
+			if((*it)[0] == '"')
+			{
+				//String
+				this->comms->write(" is of a String type.\n");
+				var_list.push_back(new String((*it).substr(1)));
+			}
+			else
+			{
+				//Integer
+				this->comms->write(" is of an Integer type.\n");
+				var_list.push_back(new Integer(std::stoi(*it)));
+			}
+		}
+
+		Variable** var_array = new Variable*[number_of_variables];
+		unsigned int index = 0;
+		for(std::list<Variable*>::iterator it = var_list.begin(); it != var_list.end(); ++it, ++index)
+		{
+			var_array[index] = *it;
+		}
+
+		Function::Function_Arguments func_args(number_of_variables, var_array);
+		if(this->environment.get_function_space().is_function_here(match[1], func_args))
+		{
+			this->comms->write("Calling.\n");
+			this->environment.get_function_space().call_function(match[1], func_args);
+			this->comms->write("#done.\n");
+		}
+		else
+		{
+			this->comms->write("No matching function found for these arguments.\n");
+			return;
+		}
+	}
 }
 
 void Script_Engine::parse_preprocessed(std::string& line_of_code)
@@ -108,4 +249,9 @@ Script_Engine::~Script_Engine()
 void Script_Engine::Default_Communicator::write(const std::string& line) const
 {
 	std::cout << line;
+}
+
+Script_Engine::Default_Communicator::~Default_Communicator()
+{
+
 }
