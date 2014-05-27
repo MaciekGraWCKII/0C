@@ -76,6 +76,38 @@ public:
 	}
 };
 
+#define MODE_FIRST_VERSION 1
+#define MODE_REGEX_WITHOUT_EXPRESSION 2
+#define MODE_REGEX_WITH_EXPRESSION 3
+unsigned int mode = MODE_REGEX_WITHOUT_EXPRESSION;
+
+class Change_Parsing_Function : public Executable_Block_Of_Code
+{
+public:
+	Variable* execute(Script_Environment& environment)
+	{
+		std::string t = dynamic_cast<String*>(&environment.get_variable_space().get_variable("CHANGE_PARSING_FUNCTION_ARG"))->get_string();
+
+		if(t == "FIRST_VERSION")
+		{
+			mode = MODE_FIRST_VERSION;
+		}
+		else if(t == "REGEX_WITHOUT_EXPRESSION")
+		{
+			mode = MODE_REGEX_WITHOUT_EXPRESSION;
+		}else if(t == "REGEX_WITH_EXPRESSION")
+		{
+			mode = MODE_REGEX_WITH_EXPRESSION;
+		}
+		else
+		{
+			environment.get_communicator().write("I do not now this mode: \"" + t + "\"\n");
+		}
+
+		return NULL;
+	}
+};
+
 int main()
 {
 	Script_Engine engine(new Announcer());
@@ -103,6 +135,14 @@ int main()
 		new Function::Function_Arguments_Dummy(1, tab_log, tab_log_types),
 		new Change_logging())) << endl;
 
+	std::string* ch_p_f = new std::string[1];
+	ch_p_f[0] = "CHANGE_PARSING_FUNCTION_ARG";
+	std::string* ch_p_f_types = new std::string[1];
+	ch_p_f_types[0] = TYPE_STRING;
+	cout << engine.add_function("change_parsing_function", new Function(TYPE_NULL,
+		new Function::Function_Arguments_Dummy(1, ch_p_f, ch_p_f_types),
+		new Change_Parsing_Function())) << endl;
+
 	string entry;
 
 	while(nexit)
@@ -112,7 +152,24 @@ int main()
 		{
 			break;
 		}
-		engine.parse_test_regex(entry);
+		switch(mode)
+		{
+		case MODE_FIRST_VERSION:
+			engine.parse_preprocessed(entry);
+			break;
+		
+		case MODE_REGEX_WITHOUT_EXPRESSION:
+			engine.parse_test_regex(entry);
+			break;
+
+		case MODE_REGEX_WITH_EXPRESSION:
+			engine.parse_test_regex_with_expression(entry);
+			break;
+
+		default:
+			cout << "DUPESKO!" << endl;
+			break;
+		}
 	}
 
 	cout << endl << "system(\"PAUSE\");" << endl;

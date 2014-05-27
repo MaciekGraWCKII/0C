@@ -1,6 +1,6 @@
 #include "Script_Environment.h"
 
-Script_Environment::Script_Environment() : function_space(*this), variable_space(*this)
+Script_Environment::Script_Environment(Communicator& comms) : comms(comms), function_space(*this), variable_space(*this)
 {
 
 }
@@ -18,6 +18,11 @@ Variable_Space& Script_Environment::get_variable_space()
 Variable_Factory& Script_Environment::get_variable_factory()
 {
 	return this->variable_factory;
+}
+
+Communicator& Script_Environment::get_communicator()
+{
+	return this->comms;
 }
 
 bool Script_Environment::is_name_used_in_function_space(const std::string& name) const

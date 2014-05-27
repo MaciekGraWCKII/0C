@@ -16,6 +16,7 @@ public:
 
 	void parse(std::string& line_of_code);
 
+	void parse_test_regex_with_expression(std::string& line_of_code);
 	void parse_test_regex(std::string& line_of_code);
 	void parse_preprocessed(std::string& line_of_code);
 		//assumes code is prepared for execution after one operation: split

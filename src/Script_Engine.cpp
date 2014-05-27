@@ -7,13 +7,14 @@
 #include <list>
 #include <cctype>
 #include <regex>
+#include "Expression.h"
 
-Script_Engine::Script_Engine()
+Script_Engine::Script_Engine() : comms(new Default_Communicator()), environment(*comms)
 {
-	this->comms = new Default_Communicator();
+
 }
 
-Script_Engine::Script_Engine(Communicator* communicator) : comms(communicator)
+Script_Engine::Script_Engine(Communicator* communicator) : comms(communicator), environment(*communicator)
 {
 
 }
@@ -21,6 +22,18 @@ Script_Engine::Script_Engine(Communicator* communicator) : comms(communicator)
 void Script_Engine::parse(std::string& line_of_code)
 {
 	
+}
+
+void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
+{
+	std::regex reg("([a-zA-Z]\\w*)\\((.*)\\);");
+	std::smatch match;
+
+	if(std::regex_match(line_of_code, match, reg))
+	{
+		Expression_Parser expression_parser;
+		expression_parser.parse(match[2]);
+	}
 }
 
 void Script_Engine::parse_test_regex(std::string& line_of_code)
@@ -139,6 +152,7 @@ void Script_Engine::parse_test_regex(std::string& line_of_code)
 				this->comms->write(" is of an Integer type.\n");
 				var_list.push_back(new Integer(std::stoi(*it)));
 			}
+			
 		}
 
 		Variable** var_array = new Variable*[number_of_variables];
