@@ -30,6 +30,7 @@ Variable* parse_int(const std::string& line, const unsigned int first_char, unsi
 			//throw sumfin'
 		}
 	}
+	return new Integer(std::stoi(line.substr(first_char)));
 }
 
 //first_character of a string, not the '\"'
@@ -39,7 +40,7 @@ Variable* parse_string(const std::string& line, unsigned int first_char, unsigne
 
 	char character;
 	unsigned int number_of_slashes = 0;
-	std::string line_copy = line;
+	std::string line_copy;
 
 	for(unsigned int i = first_char; i < line.size(); ++i)
 	{
@@ -47,15 +48,20 @@ Variable* parse_string(const std::string& line, unsigned int first_char, unsigne
 
 		if(character == '\\')
 		{
-			line_copy.erase(line_copy.begin() + i);
 			++i;
-			++number_of_slashes;
+			if(line[i] == '\"')
+			{
+				line_copy += line[i];
+			}
 		}
-
-		if(character == '\"')
+		else if(character == '\"')
 		{
 			*last_parsed = i;
-			return new String(line_copy.substr(first_char, i - first_char - 1 - number_of_slashes));
+			return new String(line_copy);
+		}
+		else
+		{
+			line_copy += character;
 		}
 	}
 }
@@ -77,7 +83,7 @@ Variable* parse_parentheses(const std::string& line, unsigned int first_char, un
 			if(number_of_open_parentheses == 0)
 			{
 				*last_parsed = i;
-				return e_parser.parse(line.substr(0, i - 1));
+				return e_parser.parse(line.substr(first_char + 1, i - 1));
 			}
 		}
 	}
@@ -163,15 +169,18 @@ Variable* Expression_Parser::parse(const std::string& line)
 	Variable* temp;
 	while(!operator_vector.empty())
 	{
-		for(unsigned int i = 0; i < operator_vector.size(); ++i)
+		unsigned int i = 0;
+		while(i < operator_vector.size())
 		{
 			if(operator_vector[i]->get_priority() == current_operator_priority)
 			{
 				temp = operator_vector[i]->execute(variable_vector[i], variable_vector[i + 1]);
-				variable_vector.erase(variable_vector.begin() + i, variable_vector.begin() + i + 1);
-				variable_vector.insert(variable_vector.begin() + i - 1, temp);
+				variable_vector.erase(variable_vector.begin() + i, variable_vector.begin() + i + 2);
+				variable_vector.insert(variable_vector.begin() + i, temp);
 				operator_vector.erase(operator_vector.begin() + i);
+				i = 0;
 			}
+			else ++i;
 		}
 		--current_operator_priority;
 	}

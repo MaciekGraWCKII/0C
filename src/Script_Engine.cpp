@@ -31,8 +31,51 @@ void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
 
 	if(std::regex_match(line_of_code, match, reg))
 	{
+		for(unsigned int i = 0; i < match.size(); ++i)
+		{
+			this->comms->write(std::to_string(i) + ": \"" + match[i].str() + "\"\n");
+		}
+		if(!this->environment.get_function_space().is_name_here(match[1]))
+		{
+			this->comms->write("There is no function with the name \"" + match[1].str() + "\n");
+			return;
+		}
 		Expression_Parser expression_parser;
-		expression_parser.parse(match[2]);
+		std::list<Variable*> var_list; 
+		unsigned int number_of_args = 0;
+		unsigned int first_to_cut = 0;
+		std::string args = match[2];
+		for(unsigned int i = 0; i < args.size(); ++i)
+		{
+			if(args[i] == ',')
+			{
+				var_list.push_back(expression_parser.parse(args.substr(first_to_cut, first_to_cut - i - 1)));
+				first_to_cut = i + 1;
+				++number_of_args;
+			}
+		}
+		var_list.push_back(expression_parser.parse(args.substr(first_to_cut)));
+		++number_of_args;
+		Variable** var_array = new Variable*[number_of_args];
+		std::list<Variable*>::iterator it = var_list.begin();
+		for(unsigned int i = 0; i < number_of_args; ++i, ++it)
+		{
+			var_array[i] = *it;
+		}
+		Function::Function_Arguments f_args(number_of_args, var_array);
+		if(this->environment.get_function_space().is_function_here(match[1], f_args))
+		{
+			this->environment.get_function_space().call_function(match[1], f_args);
+		}
+		else
+		{
+			this->comms->write("There is no \"" + match[1].str() + "\" with these arguments: ");
+			for(unsigned int i = 0; i < number_of_args; ++i)
+			{
+				this->comms->write("\"" + f_args[i].get_type() + "\"");
+			}
+			this->comms->write("\n");
+		}
 	}
 }
 

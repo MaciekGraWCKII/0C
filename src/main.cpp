@@ -79,7 +79,7 @@ public:
 #define MODE_FIRST_VERSION 1
 #define MODE_REGEX_WITHOUT_EXPRESSION 2
 #define MODE_REGEX_WITH_EXPRESSION 3
-unsigned int mode = MODE_REGEX_WITHOUT_EXPRESSION;
+unsigned int mode = MODE_REGEX_WITH_EXPRESSION;
 
 class Change_Parsing_Function : public Executable_Block_Of_Code
 {
