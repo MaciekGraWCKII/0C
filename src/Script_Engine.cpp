@@ -33,7 +33,7 @@ void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
 	{
 		for(unsigned int i = 0; i < match.size(); ++i)
 		{
-			this->comms->write(std::to_string(i) + ": \"" + match[i].str() + "\"\n");
+			this->comms->write(std::to_string(((long long) i)) + ": \"" + match[i].str() + "\"\n");
 		}
 		if(!this->environment.get_function_space().is_name_here(match[1]))
 		{
@@ -92,7 +92,7 @@ void Script_Engine::parse_test_regex(std::string& line_of_code)
 		this->comms->write("Matched: \"" + line_of_code + "\"\n");
 		for(unsigned int i = 0; i < match.size(); ++i)
 		{
-			this->comms->write(std::to_string(i) + ": \"" + match[i].str() + "\"\n");
+			this->comms->write( std::to_string((long long)i) + ": \"" + match[i].str() + "\"\n");
 		}
 
 		if(!this->environment.get_function_space().is_name_here(match[1]))
@@ -138,7 +138,7 @@ void Script_Engine::parse_test_regex(std::string& line_of_code)
 		std::list<Variable*> var_list;
 		for(std::list<std::string>::iterator it = arg_list.begin(); it != arg_list.end(); ++it)
 		{
-			this->comms->write("arg " + std::to_string(number_of_variables) + ": \"" + *it + "\"");
+			this->comms->write("arg " + std::to_string((long long)number_of_variables) + ": \"" + *it + "\"");
 			++number_of_variables;
 			
 			//Remove irrelevant spaces
