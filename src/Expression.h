@@ -29,9 +29,7 @@ public:
 
 	virtual Variable* execute(Variable* l, Variable* r) = 0;
 
-	//BEWARE CODERS
-	//NO VIRUTAL DESTRUCTOR!!
-	//
+	virtual ~Operator();
 };
 
 class Operator_Plus : public Operator

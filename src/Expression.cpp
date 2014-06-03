@@ -21,7 +21,7 @@ Variable* parse_int(const std::string& line, const unsigned int first_char, unsi
 		character = line[i];
 		if(is_this_end_of_int(character))
 		{
-			*last_parsed = i;
+			*last_parsed = i - 1;
 			return new Integer(std::stoi(line.substr(first_char, i - first_char)));
 		}
 		else if(!isdigit(character))
@@ -30,6 +30,8 @@ Variable* parse_int(const std::string& line, const unsigned int first_char, unsi
 			//throw sumfin'
 		}
 	}
+
+	*last_parsed = line.size();
 	return new Integer(std::stoi(line.substr(first_char)));
 }
 
@@ -64,10 +66,33 @@ Variable* parse_string(const std::string& line, unsigned int first_char, unsigne
 			line_copy += character;
 		}
 	}
+
+	*last_parsed = line.size();
+	return NULL;
+}
+
+bool is_this_end_of_identifier(char c)
+{
+	return (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/');
 }
 
 Variable* parse_identifier(const std::string& line, unsigned int first_char, unsigned int* last_parsed)
 {
+	for(unsigned int i = 0; i < line.size(); ++i)
+	{
+
+		if(line[i] == '(')
+		{
+			//Function call
+
+		}
+		else if(is_this_end_of_identifier(line[i]))
+		{
+			
+		}
+	}
+
+	*last_parsed = line.size();
 	return NULL;
 }
 
@@ -99,6 +124,7 @@ Variable* Expression_Parser::parse(const std::string& line)
 
 	bool operator_allowed = false;
 	char character;
+	bool space_only = true;
 	for(unsigned int i = 0; i < line.size(); ++i)
 	{
 		character = line[i];
@@ -109,6 +135,7 @@ Variable* Expression_Parser::parse(const std::string& line)
 		}
 		else
 		{
+			space_only = false;
 			if(isdigit(character))
 			{
 				variable_vector.push_back(parse_int(line, i, &i));
@@ -163,6 +190,11 @@ Variable* Expression_Parser::parse(const std::string& line)
 				}
 			}
 		}
+	}
+
+	if(space_only)
+	{
+		return NULL;
 	}
 
 	unsigned int current_operator_priority = Operator::get_max_priority();

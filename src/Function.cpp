@@ -193,7 +193,7 @@ Function::~Function()
 }
 
 void Function::prep_subspace_and_args(const Function_Arguments& args, 
-									  Script_Environment& env) const
+	Script_Environment& env) const
 {
 	Variable_Space& var_space = env.get_variable_space();
 	var_space.new_subspace();

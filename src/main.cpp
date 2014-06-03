@@ -76,6 +76,18 @@ public:
 	}
 };
 
+class Integer_To_String : public Executable_Block_Of_Code
+{
+public:
+	Variable* execute(Script_Environment& environment)
+	{
+		int iarg = dynamic_cast<Integer*>(
+			&environment.get_variable_space().get_variable("INTEGER_TO_STRING_ARG_0"))->get_int();
+	
+		return new String(std::to_string(iarg));
+	}
+};
+
 #define MODE_FIRST_VERSION 1
 #define MODE_REGEX_WITHOUT_EXPRESSION 2
 #define MODE_REGEX_WITH_EXPRESSION 3
@@ -141,6 +153,14 @@ int main()
 	ch_p_f_types[0] = TYPE_STRING;
 	cout << engine.add_function("change_parsing_function", new Function(TYPE_NULL,
 		new Function::Function_Arguments_Dummy(1, ch_p_f, ch_p_f_types),
+		new Change_Parsing_Function())) << endl;
+
+	std::string* fun_arg_name_array = new std::string[1];
+	fun_arg_name_array[0] = "INTEGER_TO_STRING_ARG_0";
+	std::string* fun_arg_type_array = new std::string[1];
+	fun_arg_type_array[0] = TYPE_INTEGER;
+	cout << engine.add_function("int_to_string", new Function(TYPE_STRING,
+		new Function::Function_Arguments_Dummy(1, fun_arg_name_array, fun_arg_type_array),
 		new Change_Parsing_Function())) << endl;
 
 	string entry;

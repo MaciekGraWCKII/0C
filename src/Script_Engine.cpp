@@ -55,7 +55,10 @@ void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
 			}
 		}
 		var_list.push_back(expression_parser.parse(args.substr(first_to_cut)));
-		++number_of_args;
+		if(NULL != var_list.back())
+		{
+			++number_of_args;
+		}
 		Variable** var_array = new Variable*[number_of_args];
 		std::list<Variable*>::iterator it = var_list.begin();
 		for(unsigned int i = 0; i < number_of_args; ++i, ++it)
