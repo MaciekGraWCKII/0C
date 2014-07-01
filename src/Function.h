@@ -67,7 +67,7 @@ private:
 
 	void prep_subspace_and_args(const Function_Arguments& args, 
 		Script_Environment& env) const;
-	void delete_subspace(Script_Environment& env) const;
+	void delete_subspace(const Function_Arguments& args, Script_Environment& env) const;
 
 };
 

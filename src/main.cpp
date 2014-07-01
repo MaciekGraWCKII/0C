@@ -84,7 +84,7 @@ public:
 		int iarg = dynamic_cast<Integer*>(
 			&environment.get_variable_space().get_variable("INTEGER_TO_STRING_ARG_0"))->get_int();
 	
-		return new String(std::to_string(iarg));
+		return new String(std::to_string((long long)iarg));
 	}
 };
 

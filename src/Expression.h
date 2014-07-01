@@ -29,7 +29,7 @@ public:
 
 	virtual Variable* execute(Variable* l, Variable* r) = 0;
 
-	virtual ~Operator();
+	//virtual ~Operator();
 };
 
 class Operator_Plus : public Operator

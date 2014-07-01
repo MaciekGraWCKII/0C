@@ -176,7 +176,7 @@ Variable* Function::execute(const Function_Arguments& args,
 
 		this->prep_subspace_and_args(args, environment);
 		temp = this->exec->execute(environment);
-		this->delete_subspace(environment);
+		this->delete_subspace(args, environment);
 
 		return temp;
 	}
@@ -200,11 +200,15 @@ void Function::prep_subspace_and_args(const Function_Arguments& args,
 
 	for(int i = 0; i < args.get_size(); ++i)
 	{
-		var_space.add_variable(this->args_dummy->get_name_at(i), &(Variable&)args[i]); //wtf!
+		var_space.add_variable(this->args_dummy->get_name_at(i), args[i].replicate());
 	}
 }
 
-void Function::delete_subspace(Script_Environment& env) const
+void Function::delete_subspace(const Function_Arguments& args, Script_Environment& env) const
 {
+	for(int i = 0; i < args.get_size(); ++i)
+	{
+		((Variable &) args[i]) = env.get_variable_space().get_variable(this->args_dummy->get_name_at(i)); //wtf1!
+	}
 	env.get_variable_space().pop_subspace();
 }

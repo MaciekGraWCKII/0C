@@ -71,6 +71,11 @@ Integer& Integer::operator=(const Integer& integer)
 	return *this;
 }
 
+Variable* Integer::replicate() const
+{
+	return new Integer(this->value);
+}
+
 int Integer::get_int()
 {
 	return value;
@@ -118,6 +123,11 @@ String& String::operator=(const String& str)
 {
 	this->str = str.str;
 	return *this;
+}
+
+Variable* String::replicate() const
+{
+	return new String(this->str);
 }
 
 std::string& String::get_string()

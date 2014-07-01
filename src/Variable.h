@@ -18,6 +18,7 @@ public:
 	std::string get_type() const;
 	virtual bool operator==(const Variable& var) const;
 	virtual Variable& operator=(const Variable& var);
+	virtual Variable* replicate() const = 0; //FIXME
 
 	virtual ~Variable();
 private:
@@ -32,6 +33,8 @@ public:
 	bool operator==(const Integer& integer) const;
 	Variable& operator=(const Variable& var);
 	Integer& operator=(const Integer& integer);
+	Variable* replicate() const;
+
 
 	int get_int();
 private:
@@ -46,6 +49,7 @@ public:
 	bool operator==(const String& str) const;
 	Variable& operator=(const Variable& var);
 	String& operator=(const String& str);
+	Variable* replicate() const;
 
 	std::string& get_string();
 private:
