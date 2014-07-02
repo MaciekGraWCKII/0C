@@ -80,11 +80,17 @@ Variable* Variable_Factory::new_simple_variable(const std::string& type,
 		return new Integer();
 	}
 	
+	if(type == TYPE_DOUBLE)
+	{
+		return new Double();
+	}
+
 	if(type == TYPE_STRING)
 	{
 		return new String();
 	}
 
+	//No such type
 	return NULL;
 }
 

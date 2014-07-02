@@ -81,6 +81,58 @@ int Integer::get_int()
 	return value;
 }
 
+Double::Double(const double duble = 0) : duble(duble), Variable(TYPE_DOUBLE)
+{
+
+}
+
+bool Double::operator==(const Variable& var) const
+{
+	if(var.get_type() == this->get_type)
+	{
+		return this->operator==((const Double&)var);
+	}
+	else
+	{
+		//TODO throw?
+		return false;
+	}
+}
+
+bool Double::operator==(const Double& other) const
+{
+	return this->duble == other.duble;
+}
+
+Variable& Double::operator=(const Variable& var)
+{
+	if(var.get_type == this->get_type())
+	{
+		return this->operator=((const Double&)var);
+	}
+	else
+	{
+		//TODO throw?
+		return *this;
+	}
+}
+
+Double& Double::operator=(const Double& other)
+{
+	this->duble == other.duble;
+	return *this;
+}
+
+Variable* Double::replicate() const
+{
+	return new Double(this->duble);
+}
+
+double Double::get_double() const
+{
+	return this->duble;
+}
+
 String::String(const std::string& str) : Variable(TYPE_STRING), str(str)
 {
 

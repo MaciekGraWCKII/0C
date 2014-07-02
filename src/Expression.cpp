@@ -12,22 +12,42 @@ bool is_this_end_of_int(char character)
 		character == '/');
 }
 
-Variable* parse_int(const std::string& line, const unsigned int first_char, unsigned int* last_parsed)
+Variable* parse_number(const std::string& line, const unsigned int first_char, unsigned int* last_parsed)
 {
 	char character;
+	bool dot_encountered = false;
 
 	for(unsigned int i = first_char + 1; i < line.size(); ++i)
 	{
 		character = line[i];
+		if(character == '.')
+		{
+			if(dot_encountered)
+			{
+				//TODO throw : second dot in double !
+			}
+			else
+			{
+				dot_encountered = true;
+			}
+		}
 		if(is_this_end_of_int(character))
 		{
 			*last_parsed = i - 1;
-			return new Integer(std::stoi(line.substr(first_char, i - first_char)));
+			if(dot_encountered)
+			{
+				//parse as double
+				return new Double(std::stod(line.substr(first_char, i - first_char)));
+			}
+			else
+			{
+				return new Integer(std::stoi(line.substr(first_char, i - first_char)));
+			}
 		}
 		else if(!isdigit(character))
 		{
 			//TODO
-			//throw sumfin'
+			//throw sumfin' - we have encountered a character which is not a digit nor a '.'
 		}
 	}
 
@@ -138,7 +158,7 @@ Variable* Expression_Parser::parse(const std::string& line)
 			space_only = false;
 			if(isdigit(character))
 			{
-				variable_vector.push_back(parse_int(line, i, &i));
+				variable_vector.push_back(parse_number(line, i, &i));
 				operator_allowed = true;
 			}
 			else if(character == '\"')
@@ -295,9 +315,37 @@ Variable* Operator_Plus::execute(Variable* l, Variable* r)
 			return ti;
 		}
 
-		//TODO end
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Integer*>(l)->get_int() + dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
 	}
 
+	if(ltype == TYPE_DOUBLE)
+	{
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() + dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		if(rtype == TYPE_INTEGER)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() + dynamic_cast<Integer*>(r)->get_int());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
+	}
 	
 }
 
@@ -321,7 +369,36 @@ Variable* Operator_Minus::execute(Variable* l, Variable* r)
 			return ti;
 		}
 
-		//TODO end
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Integer*>(l)->get_int() - dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
+	}
+
+	if(ltype == TYPE_DOUBLE)
+	{
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() - dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		if(rtype == TYPE_INTEGER)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() - dynamic_cast<Integer*>(r)->get_int());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
 	}
 
 	//TODO end
@@ -347,9 +424,37 @@ Variable* Operator_Times::execute(Variable* l, Variable* r)
 			return ti;
 		}
 
-		//TODO end
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Integer*>(l)->get_int() * dynamic_cast<Double*>(r)->get_double());
+			delete r;
+			delete l;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
 	}
 
+	if(ltype == TYPE_DOUBLE)
+	{
+		if(rtype == TYPE_DOUBLE)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() * dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		if(rtype == TYPE_INTEGER)
+		{
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() * dynamic_cast<Integer*>(r)->get_int());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
+	}
 	//TODO end
 }
 
@@ -367,13 +472,58 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 	{
 		if(rtype == TYPE_INTEGER)
 		{
+			if(dynamic_cast<Integer*>(r)->get_int() == 0)
+			{
+				//TODO throw : can not delete by zero!
+			}
 			Integer* ti = new Integer(dynamic_cast<Integer*>(l)->get_int() / dynamic_cast<Integer*>(r)->get_int());
 			delete l;
 			delete r;
 			return ti;
 		}
 
-		//TODO end
+		if(rtype == TYPE_DOUBLE)
+		{
+			if(dynamic_cast<Double*>(r)->get_double() == 0)
+			{
+				//TODO throw : can not delete by zero!
+			}
+			Double* td = new Double(dynamic_cast<Integer*>(l)->get_int() / dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
+	}
+
+	if(ltype == TYPE_DOUBLE)
+	{
+		if(rtype == TYPE_DOUBLE)
+		{
+			if(dynamic_cast<Double*>(r)->get_double() == 0)
+			{
+				//TODO throw : can not delete by 0!
+			}
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double / dynamic_cast<Double*>(r)->get_double());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		if(rtype == TYPE_INTEGER)
+		{
+			if(dynamic_cast<Integer*>(r)->get_int() == 0)
+			{
+				//TODO throw : can not delete by 0!
+			}
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() / dynamic_cast<Integer*>(r)->get_int());
+			delete l;
+			delete r;
+			return td;
+		}
+
+		//TODO throw : operator can not find a type match
 	}
 
 	//TODO end
