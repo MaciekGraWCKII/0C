@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "Variable.h"
+#include "Exception.h"
 
 bool is_this_end_of_int(char character)
 {
@@ -36,7 +37,7 @@ Variable* parse_number(const std::string& line, const unsigned int first_char, u
 			*last_parsed = i - 1;
 			if(dot_encountered)
 			{
-				//parse as double
+				//parse as a double
 				return new Double(std::stod(line.substr(first_char, i - first_char)));
 			}
 			else
@@ -139,6 +140,7 @@ Variable* parse_parentheses(const std::string& line, unsigned int first_char, un
 
 Variable* Expression_Parser::parse(const std::string& line)
 {
+	std::vector<bool> is_var_temp_vector;
 	std::vector<Variable*> variable_vector;
 	std::vector<Operator*> operator_vector;
 
@@ -159,21 +161,27 @@ Variable* Expression_Parser::parse(const std::string& line)
 			if(isdigit(character))
 			{
 				variable_vector.push_back(parse_number(line, i, &i));
+				is_var_temp_vector.push_back(true);
 				operator_allowed = true;
 			}
 			else if(character == '\"')
 			{
 				variable_vector.push_back(parse_string(line, i + 1, &i));
+				is_var_temp_vector.push_back(true);
 				operator_allowed = true;
 			}
 			else if(character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z')
 			{
 				//identifier
 				variable_vector.push_back(parse_identifier(line, i, &i));
+				is_var_temp_vector.push_back(false);
+				operator_allowed = true;
 			}
 			else if(character == '(')
 			{
 				variable_vector.push_back(parse_parentheses(line, i, &i, *this));
+				is_var_temp_vector.push_back(true);
+				operator_allowed = true;
 			}
 			else
 			{
@@ -182,6 +190,18 @@ Variable* Expression_Parser::parse(const std::string& line)
 					//TODO throw
 
 				}
+
+				if(!is_var_temp_vector.back())
+				{
+					//copy lvar
+					Variable* var = variable_vector.back();
+					variable_vector.pop_back();
+					variable_vector.push_back(var->replicate());
+					//not necessary? 
+					is_var_temp_vector.pop_back();
+					is_var_temp_vector.push_back(true);
+				}
+
 				switch(character)
 				{
 				case '+':
@@ -262,6 +282,13 @@ unsigned int Operator::get_max_priority()
 	return Operator::max_priority;
 }
 
+void Operator::no_match_error(const std::string& who, const std::string& ltype, const std::string& rtype, Variable* l, Variable* r)const
+{
+	delete l;
+	delete r;
+	throw Exception(who + " can not find a suitable match for the types: ltype = \"" + ltype + "\" rtype = \"" + rtype);
+}
+
 Operator_Plus::Operator_Plus() : Operator(PLUS_PRIORITY)
 {
 
@@ -287,8 +314,7 @@ Variable* Operator_Plus::execute(Variable* l, Variable* r)
 
 		}
 
-		//TODO
-		//throw: operator can not find a type match
+		this->no_match_error("Operator_Plus", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_STRING)
@@ -301,8 +327,7 @@ Variable* Operator_Plus::execute(Variable* l, Variable* r)
 			return ts;
 		}
 
-		//TODO
-		//throw: operator can not find a type match
+		this->no_match_error("Operator_Plus", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_INTEGER)
@@ -323,7 +348,7 @@ Variable* Operator_Plus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Plus", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_DOUBLE)
@@ -344,7 +369,7 @@ Variable* Operator_Plus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Plus", ltype, rtype, l, r);
 	}
 	
 }
@@ -377,7 +402,7 @@ Variable* Operator_Minus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Minus", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_DOUBLE)
@@ -398,10 +423,9 @@ Variable* Operator_Minus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Minus", ltype, rtype, l, r);
 	}
 
-	//TODO end
 }
 
 Operator_Times::Operator_Times() : Operator(TIMES_PRIORITY)
@@ -432,7 +456,7 @@ Variable* Operator_Times::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Times", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_DOUBLE)
@@ -453,9 +477,8 @@ Variable* Operator_Times::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Times", ltype, rtype, l, r);
 	}
-	//TODO end
 }
 
 Operator_Obelus::Operator_Obelus() : Operator(OBELUS_PRIORITY)
@@ -474,7 +497,9 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 		{
 			if(dynamic_cast<Integer*>(r)->get_int() == 0)
 			{
-				//TODO throw : can not delete by zero!
+				throw Exception("Operator_Obelus: can not divide by zero. l(\"" + ltype + "\")=" 
+					+ std::to_string((long long)dynamic_cast<Integer*>(l)->get_int()) + " r(\"" + rtype + "\"=" + 
+					std::to_string((long long)dynamic_cast<Integer*>(r)->get_int()));
 			}
 			Integer* ti = new Integer(dynamic_cast<Integer*>(l)->get_int() / dynamic_cast<Integer*>(r)->get_int());
 			delete l;
@@ -486,7 +511,9 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 		{
 			if(dynamic_cast<Double*>(r)->get_double() == 0)
 			{
-				//TODO throw : can not delete by zero!
+				throw Exception("Operator_Obelus: can not divide by zero. l(\"" + ltype + "\")=" 
+					+ std::to_string((long long)dynamic_cast<Integer*>(l)->get_int()) + " r(\"" + rtype + "\"=" + 
+					std::to_string((long double)dynamic_cast<Double*>(r)->get_double()));
 			}
 			Double* td = new Double(dynamic_cast<Integer*>(l)->get_int() / dynamic_cast<Double*>(r)->get_double());
 			delete l;
@@ -494,7 +521,7 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Obelus", ltype, rtype, l, r);
 	}
 
 	if(ltype == TYPE_DOUBLE)
@@ -503,9 +530,11 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 		{
 			if(dynamic_cast<Double*>(r)->get_double() == 0)
 			{
-				//TODO throw : can not delete by 0!
+				throw Exception("Operator_Obelus: can not divide by zero. l(\"" + ltype + "\")=" 
+					+ std::to_string((long double)dynamic_cast<Double*>(l)->get_double()) + " r(\"" + rtype + "\"=" + 
+					std::to_string((long double)dynamic_cast<Double*>(r)->get_double()));
 			}
-			Double* td = new Double(dynamic_cast<Double*>(l)->get_double / dynamic_cast<Double*>(r)->get_double());
+			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() / dynamic_cast<Double*>(r)->get_double());
 			delete l;
 			delete r;
 			return td;
@@ -515,7 +544,9 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 		{
 			if(dynamic_cast<Integer*>(r)->get_int() == 0)
 			{
-				//TODO throw : can not delete by 0!
+				throw Exception("Operator_Obelus: can not divide by zero. l(\"" + ltype + "\")=" 
+					+ std::to_string((long double)dynamic_cast<Double*>(l)->get_double()) + " r(\"" + rtype + "\"=" + 
+					std::to_string((long long)dynamic_cast<Integer*>(r)->get_int()));
 			}
 			Double* td = new Double(dynamic_cast<Double*>(l)->get_double() / dynamic_cast<Integer*>(r)->get_int());
 			delete l;
@@ -523,8 +554,7 @@ Variable* Operator_Obelus::execute(Variable* l, Variable* r)
 			return td;
 		}
 
-		//TODO throw : operator can not find a type match
+		this->no_match_error("Operator_Obelus", ltype, rtype, l, r);
 	}
 
-	//TODO end
 }

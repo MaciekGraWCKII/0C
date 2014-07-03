@@ -22,6 +22,9 @@ private:
 	unsigned int priority;
 	static unsigned int max_priority;
 
+protected:
+	void no_match_error(const std::string& who, const std::string& ltype, const std::string& rtype, Variable* l, Variable* r)const;
+
 public:
 	Operator(unsigned int priority);
 	unsigned int get_priority();

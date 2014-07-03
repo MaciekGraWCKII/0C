@@ -8,6 +8,7 @@
 #include <cctype>
 #include <regex>
 #include "Expression.h"
+#include "Exception.h"
 
 Script_Engine::Script_Engine() : comms(new Default_Communicator()), environment(*comms)
 {
@@ -45,16 +46,25 @@ void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
 		unsigned int number_of_args = 0;
 		unsigned int first_to_cut = 0;
 		std::string args = match[2];
-		for(unsigned int i = 0; i < args.size(); ++i)
+
+		try
 		{
-			if(args[i] == ',')
+			for(unsigned int i = 0; i < args.size(); ++i)
 			{
-				var_list.push_back(expression_parser.parse(args.substr(first_to_cut, first_to_cut - i - 1)));
-				first_to_cut = i + 1;
-				++number_of_args;
+				if(args[i] == ',')
+				{
+					var_list.push_back(expression_parser.parse(args.substr(first_to_cut, first_to_cut - i - 1)));
+					first_to_cut = i + 1;
+					++number_of_args;
+				}
 			}
+			var_list.push_back(expression_parser.parse(args.substr(first_to_cut)));
 		}
-		var_list.push_back(expression_parser.parse(args.substr(first_to_cut)));
+		catch(Exception& exception)
+		{
+			comms->write(exception.get_description());
+		}
+
 		if(NULL != var_list.back())
 		{
 			++number_of_args;
