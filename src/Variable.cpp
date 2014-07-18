@@ -81,14 +81,14 @@ int Integer::get_int()
 	return value;
 }
 
-Double::Double(const double duble = 0) : duble(duble), Variable(TYPE_DOUBLE)
+Double::Double(const double duble) : duble(duble), Variable(TYPE_DOUBLE)
 {
 
 }
 
 bool Double::operator==(const Variable& var) const
 {
-	if(var.get_type() == this->get_type)
+	if(var.get_type() == this->get_type())
 	{
 		return this->operator==((const Double&)var);
 	}
@@ -106,7 +106,7 @@ bool Double::operator==(const Double& other) const
 
 Variable& Double::operator=(const Variable& var)
 {
-	if(var.get_type == this->get_type())
+	if(var.get_type() == this->get_type())
 	{
 		return this->operator=((const Double&)var);
 	}

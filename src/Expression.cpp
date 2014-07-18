@@ -1,10 +1,12 @@
 #include "Expression.h"
 
 #include <vector>
+#include <list>
 #include <assert.h>
 
 #include "Variable.h"
 #include "Exception.h"
+#include "Script_Environment.h"
 
 bool is_this_end_of_int(char character)
 {
@@ -97,19 +99,93 @@ bool is_this_end_of_identifier(char c)
 	return (c == ' ' || c == '+' || c == '-' || c == '*' || c == '/');
 }
 
-Variable* parse_identifier(const std::string& line, unsigned int first_char, unsigned int* last_parsed)
+Variable* Expression_Parser::parse_identifier(const std::string& line, unsigned int first_char, unsigned int* last_parsed, Script_Environment& env)
 {
 	for(unsigned int i = 0; i < line.size(); ++i)
 	{
-
 		if(line[i] == '(')
 		{
 			//Function call
+			//cut the identifier of the function to be called
+			std::string identifier = line.substr(first_char, i - first_char);
+			
+			//check if the function identifier exists in the system
+			if(!env.get_function_space().is_name_here(identifier))
+			{
+				throw Exception("Expression::parse: There is no function with such an identifier: \"" + identifier + "\"");
+			}
 
+			//look for a closing ')' (but do not forget about '(', because each one requires its own closing ')')
+			unsigned int closing_counter = 1;
+			unsigned int first_char_of_args = i + 1;
+
+			while(closing_counter != 0)
+			{
+				++i;
+				if(line[i] == ')')
+				{
+					--closing_counter;
+				}
+				else if(line[i] == '(')
+				{
+					++closing_counter;
+				}
+			}
+			//cut args
+			std::string args = line.substr(first_char_of_args, i - first_char_of_args);
+			*last_parsed = i;
+
+			//parse args
+			std::list<Variable*> var_list;
+			unsigned int number_of_args = 0;
+			unsigned int first_to_cut = 0;
+
+			for(unsigned int i = 0; i < args.size(); ++i)
+			{
+				if(args[i] == ',')
+				{
+					var_list.push_back(this->parse(args.substr(first_to_cut, first_to_cut - i - 1), env));
+					first_to_cut = i + 1;
+					++number_of_args;
+				}
+			}
+			var_list.push_back(this->parse(args.substr(first_to_cut), env));
+
+			//in case of only one arg present or none whatsoever
+			if(NULL != var_list.back())
+			{
+				++number_of_args;
+			}
+			//array of arguments:
+			Variable** var_array = new Variable*[number_of_args];
+			std::list<Variable*>::iterator it = var_list.begin();
+			//copy arguments to the array
+			for(unsigned int i = 0; i < number_of_args; ++i, ++it)
+			{
+				var_array[i] = *it;
+			}
+			Function::Function_Arguments f_args(number_of_args, var_array);
+			if(env.get_function_space().is_function_here(identifier, f_args))
+			{
+				//Function can accept those arguments
+				return env.get_function_space().call_function(identifier, f_args);
+			}
+			else
+			{
+				//Function exists but will not accept those arguments
+				std::string arg_str;
+				for(unsigned int i = 0; i < number_of_args; ++i)
+				{
+					arg_str += var_array[i]->get_type() + "\n";
+				}
+				throw Exception("Expression::parse: function identified as \"" + identifier + "\" can not accept those arguments: \n" + arg_str);
+			}
 		}
 		else if(is_this_end_of_identifier(line[i]))
 		{
-			
+			//Variable identifier
+			*last_parsed = i;
+			return &env.get_variable_space().get_variable(line.substr(first_char, i - first_char));
 		}
 	}
 
@@ -117,7 +193,7 @@ Variable* parse_identifier(const std::string& line, unsigned int first_char, uns
 	return NULL;
 }
 
-Variable* parse_parentheses(const std::string& line, unsigned int first_char, unsigned int* last_parsed, Expression_Parser& e_parser)
+Variable* parse_parentheses(const std::string& line, unsigned int first_char, unsigned int* last_parsed, Expression_Parser& e_parser, Script_Environment& env)
 {
 	unsigned int number_of_open_parentheses = 1;
 
@@ -129,7 +205,7 @@ Variable* parse_parentheses(const std::string& line, unsigned int first_char, un
 			if(number_of_open_parentheses == 0)
 			{
 				*last_parsed = i;
-				return e_parser.parse(line.substr(first_char + 1, i - 1));
+				return e_parser.parse(line.substr(first_char + 1, i - 1), env);
 			}
 		}
 	}
@@ -138,7 +214,7 @@ Variable* parse_parentheses(const std::string& line, unsigned int first_char, un
 	//throw: not all parentheses have been closed
 }
 
-Variable* Expression_Parser::parse(const std::string& line)
+Variable* Expression_Parser::parse(const std::string& line, Script_Environment& env)
 {
 	std::vector<bool> is_var_temp_vector;
 	std::vector<Variable*> variable_vector;
@@ -173,13 +249,13 @@ Variable* Expression_Parser::parse(const std::string& line)
 			else if(character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z')
 			{
 				//identifier
-				variable_vector.push_back(parse_identifier(line, i, &i));
+				variable_vector.push_back(parse_identifier(line, i, &i, env));
 				is_var_temp_vector.push_back(false);
 				operator_allowed = true;
 			}
 			else if(character == '(')
 			{
-				variable_vector.push_back(parse_parentheses(line, i, &i, *this));
+				variable_vector.push_back(parse_parentheses(line, i, &i, *this, env));
 				is_var_temp_vector.push_back(true);
 				operator_allowed = true;
 			}

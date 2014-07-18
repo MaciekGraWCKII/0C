@@ -161,7 +161,7 @@ int main()
 	fun_arg_type_array[0] = TYPE_INTEGER;
 	cout << engine.add_function("int_to_string", new Function(TYPE_STRING,
 		new Function::Function_Arguments_Dummy(1, fun_arg_name_array, fun_arg_type_array),
-		new Change_Parsing_Function())) << endl;
+		new Integer_To_String())) << endl;
 
 	string entry;
 

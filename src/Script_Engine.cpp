@@ -53,12 +53,12 @@ void Script_Engine::parse_test_regex_with_expression(std::string& line_of_code)
 			{
 				if(args[i] == ',')
 				{
-					var_list.push_back(expression_parser.parse(args.substr(first_to_cut, first_to_cut - i - 1)));
+					var_list.push_back(expression_parser.parse(args.substr(first_to_cut, first_to_cut - i - 1), this->environment));
 					first_to_cut = i + 1;
 					++number_of_args;
 				}
 			}
-			var_list.push_back(expression_parser.parse(args.substr(first_to_cut)));
+			var_list.push_back(expression_parser.parse(args.substr(first_to_cut), this->environment));
 		}
 		catch(Exception& exception)
 		{

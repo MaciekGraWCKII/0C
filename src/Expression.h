@@ -4,11 +4,15 @@
 #include <string>
 
 class Variable;
+class Script_Environment;
 
 class Expression_Parser
 {
 public:
-	Variable* parse(const std::string& line);
+	Variable* parse(const std::string& line, Script_Environment& env);
+
+private:
+	Variable* parse_identifier(const std::string& line, unsigned int first_char, unsigned int* last_parsed, Script_Environment& env);
 };
 
 #define PLUS_PRIORITY 1
